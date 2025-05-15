@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,13 +11,36 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { LogoStyles } from "./LogoStyles";
 import { ColorPalette } from "./ColorPalette";
 import { PreviousLogos } from "./PreviousLogos";
 import { useToast } from "@/components/ui/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Send, ChevronDown, ChevronUp } from "lucide-react";
+import { Send, ChevronDown, ChevronUp, Check } from "lucide-react";
+
+// Define service tiers with their descriptions and pricing
+const SERVICE_TIERS = [
+  {
+    id: "logo-only",
+    name: "Logo Only Package",
+    description: "Professional logo design in all requested file formats",
+    price: 500
+  },
+  {
+    id: "logo-marketing",
+    name: "Logo + Marketing Items",
+    description: "Logo design plus selected marketing materials like business cards, letterhead, and social media assets",
+    price: 1200
+  },
+  {
+    id: "brand-identity",
+    name: "Complete Brand Identity",
+    description: "Comprehensive brand identity system including logo, style guide, marketing materials, and brand strategy documentation",
+    price: 2500
+  }
+];
 
 export function LogoQuestionnaire() {
   const { toast } = useToast();
@@ -49,9 +71,9 @@ export function LogoQuestionnaire() {
     fileFormats: [] as string[],
 
     // Section 5: Budget & Timeline
-    budgetRange: "",
+    serviceTier: "",
     deadline: "",
-    advancePayment: false
+    termsAgreement: false
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -134,6 +156,9 @@ export function LogoQuestionnaire() {
       setLoading(false);
     }
   };
+
+  // Get the selected service tier details
+  const selectedTier = SERVICE_TIERS.find(tier => tier.id === formData.serviceTier);
 
   return (
     <div className="container py-8 px-4 mx-auto max-w-4xl">
@@ -471,23 +496,31 @@ export function LogoQuestionnaire() {
               <h2 className="text-xl font-semibold mb-4">Budget & Timeline</h2>
               <div className="space-y-6">
                 <div>
-                  <Label htmlFor="budgetRange">Budget Range*</Label>
-                  <Select 
-                    name="budgetRange"
-                    value={formData.budgetRange} 
-                    onValueChange={(value) => handleSelectChange("budgetRange", value)}
+                  <Label htmlFor="serviceTier" className="text-base font-medium mb-3 block">
+                    Service Package*
+                  </Label>
+                  <RadioGroup 
+                    value={formData.serviceTier}
+                    onValueChange={(value) => handleSelectChange("serviceTier", value)}
+                    className="grid gap-4 pt-2"
                   >
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select budget range" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="under-500">Under $500</SelectItem>
-                      <SelectItem value="500-1000">$500 - $1,000</SelectItem>
-                      <SelectItem value="1000-2000">$1,000 - $2,000</SelectItem>
-                      <SelectItem value="2000-5000">$2,000 - $5,000</SelectItem>
-                      <SelectItem value="over-5000">Over $5,000</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    {SERVICE_TIERS.map((tier) => (
+                      <div key={tier.id} className={`flex flex-col p-4 border rounded-lg transition-all ${formData.serviceTier === tier.id ? "border-brand-purple bg-brand-lightPurple/10" : "border-gray-200"}`}>
+                        <div className="flex items-start">
+                          <div className="flex items-center h-5 mt-1">
+                            <RadioGroupItem value={tier.id} id={tier.id} />
+                          </div>
+                          <div className="ml-3 text-sm">
+                            <Label htmlFor={tier.id} className="font-medium text-lg cursor-pointer">
+                              {tier.name}
+                              <span className="ml-2 text-brand-purple font-bold">${tier.price}</span>
+                            </Label>
+                            <p className="text-gray-500 mt-1">{tier.description}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </RadioGroup>
                 </div>
 
                 <div>
@@ -503,30 +536,39 @@ export function LogoQuestionnaire() {
                   />
                 </div>
 
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="advancePayment"
-                      checked={formData.advancePayment}
-                      onCheckedChange={(checked) => {
-                        handleBooleanChange("advancePayment", checked === true);
-                      }}
-                    />
-                    <Label 
-                      htmlFor="advancePayment"
-                      className="text-sm font-normal"
-                    >
-                      I agree to make a 50% advance payment upon project kickoff
-                    </Label>
-                  </div>
-                </div>
-
-                <div className="pt-6">
-                  <div className="bg-gray-50 p-4 rounded-md mb-6">
-                    <p className="text-sm text-gray-600">
-                      By submitting this form, you agree to our terms and conditions. 
-                      Your information will be used only for the purpose of creating your logo design.
-                    </p>
+                <div className="pt-4 space-y-6">
+                  <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                    <h3 className="font-semibold text-lg mb-3">Design Engagement Terms</h3>
+                    <div className="space-y-3 text-sm text-gray-700">
+                      <p>
+                        To begin your logo design project, we will first align on expectations and the overall creative direction. 
+                        As someone already familiar with the quality and standard of my work, you can expect a collaborative process 
+                        designed to ensure a result that meets your vision.
+                      </p>
+                      <p>
+                        You will receive up to five rounds of revisions, allowing room for refinement and feedback at each stage of the design process.
+                      </p>
+                      <p>
+                        To initiate the project, a 50% advance payment will be required. This serves as a mutual commitment to the process and 
+                        ensures dedicated time and focus on your project. Please note that no draft designs can be shared before this initial payment is received.
+                      </p>
+                      <div className="flex items-center space-x-2 pt-3">
+                        <Checkbox 
+                          id="termsAgreement"
+                          checked={formData.termsAgreement}
+                          onCheckedChange={(checked) => {
+                            handleBooleanChange("termsAgreement", checked === true);
+                          }}
+                          required
+                        />
+                        <Label 
+                          htmlFor="termsAgreement"
+                          className="text-sm font-medium"
+                        >
+                          I agree to these design engagement terms*
+                        </Label>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="flex justify-between">
@@ -541,7 +583,7 @@ export function LogoQuestionnaire() {
                     <Button 
                       type="submit" 
                       className="bg-brand-purple hover:bg-brand-darkPurple"
-                      disabled={loading}
+                      disabled={loading || !formData.termsAgreement}
                     >
                       {loading ? "Submitting..." : "Submit Questionnaire"}
                       <Send className="ml-2 h-4 w-4" />
